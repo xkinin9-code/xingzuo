@@ -1,0 +1,71 @@
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-bold text-gray-800">
+                    ⭐ 星座查询分布
+                  </h3>
+                  <span className="text-sm text-gray-500">
+                    共 {Object.keys(zodiacStats || {}).length} 个星座
+                  </span>
+                </div>
+                <div className="space-y-3">
+                  {zodiacStats && Object.entries(zodiacStats)
+                    .sort((a, b) => (b[1] as any).percentage - (a[1] as any).percentage)
+                    .slice(0, 6)
+                    .map(([zodiac, data]: [string, any]) => (
+                      <div key={zodiac}>
+                        <div className="flex items-center justify-between mb-1">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xl">{getZodiacEmoji(zodiac)}</span>
+                            <span className="font-medium text-gray-700">
+                              {data.count} {zodiac}
+                            </span>
+                          </div>
+                          <span className="text-sm text-gray-500">
+                            {data.percentage}%
+                          </span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2.5">
+                          <div
+                            className="bg-gradient-to-r from-purple-600 to-pink-500 h-2.5 rounded-full transition-all duration-500"
+                            style={{ width: `${data.percentage}%` }}
+                          />
+                        </div>
+                        {data.lastQueried && (
+                          <p className="text-xs text-gray-400 mt-1">
+                            最后查询: {data.lastQueried}
+                          </p>
+                        )}
+                      </div>
+                    ))
+                  }
+                  </div>
+                  </div>
+                  {Object.keys(zodiacStats || {}).length > 6 && (
+                    <div className="text-center text-sm text-gray-500">
+                      还有 {Object.keys(zodiacStats || {}).length - 6} 个星座
+                    </div>
+                  )}
+              </div>
+
+              {/* 日期趋势 */}
+              <div className="bg-white rounded-2xl p-6 shadow-md">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-bold text-gray-800">
+                    📈 日期查询趋势
+                  </h3>
+                  <select
+                    className="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    onChange={(e) => setDateStats(historyManager.getDateStats(parseInt(e.target.value)))}
+                  >
+                    <option value={7}>最近7天</option>
+                    <option value={14}>最近14天</option>
+                    <option value={30} selected>最近30天</option>
+                    <option value={90}>最近90天</option>
+                  </select>
+                </div>
+                <div className="space-y-3">
+                  {dateStats.map((day, index) => (
+                    <div key={index} className="flex items-center gap-4">
+                      <div className="w-24 text-sm text-gray-600">
+                        {formatDate(day.date)}
+                      </div>
+                      <div className="flex-1">

@@ -1,0 +1,369 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { historyManager, type HistoryStats } from '@/lib/local-history';
+
+export default function AnalyticsPage() {
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState<HistoryStats | null>(null);
+  const [zodiacStats, setZodiacStats] = useState<any>(null);
+  const [dateStats, setDateStats] = useState<any[]>([]);
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      // 模拟API调用延迟
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      const allStats = historyManager.getStats();
+      const zodiacStatsData = historyManager.getZodiacStats();
+      const dateStatsData = historyManager.getDateStats(30);
+
+      setStats(allStats);
+      setZodiacStats(zodiacStatsData);
+      setDateStats(dateStatsData);
+    } catch (error) {
+      console.error('加载数据失败:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const clearAllHistory = () => {
+    if (confirm('确定要清空所有历史记录吗？此操作不可恢复！')) {
+      historyManager.clearAllHistories();
+      loadData();
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="mt-4 text-gray-600">加载数据中...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const totalQueries = stats?.totalQueries || 0;
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white">
+      {/* 头部 */}
+      <header className="bg-white shadow-sm">
+        <div className="container mx-auto px-4 py-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-pink-500 rounded-lg flex items-center justify-center">
+                <span className="text-white text-xl font-bold">📊</span>
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-800">数据分析</h1>
+                <p className="text-sm text-gray-600">查看您的运势查询统计</p>
+              </div>
+            </div>
+            <a
+              href="/"
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+            >
+              返回首页
+            </a>
+          </div>
+        </div>
+      </header>
+
+      {/* 主内容 */}
+      <main className="container mx-auto px-4 py-8">
+        <div className="max-w-6xl mx-auto space-y-6">
+          {/* 总览卡片 */}
+          <div className="bg-gradient-to-r from-purple-600 to-pink-500 rounded-2xl shadow-lg p-6 text-white">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-bold mb-2">总查询次数</h2>
+                <p className="text-4xl font-bold">{totalQueries}</p>
+                <p className="text-sm opacity-90 mt-2">这是一个统计周期内的查询总数</p>
+              </div>
+              <div className="text-right">
+                <div className="text-5xl mb-2">🌟</div>
+                <p className="text-sm opacity-90">持续关注，好运不断</p>
+              </div>
+            </div>
+          </div>
+
+          {totalQueries > 0 ? (
+            <>
+              {/* 基本统计 */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="bg-white rounded-2xl p-6 shadow-md">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-gray-600">最常查询星座</span>
+                    <span className="text-2xl">⭐</span>
+                  </div>
+                  <p className="text-2xl font-bold text-purple-600">
+                    {stats?.mostFrequentZodiac || '无'}
+                  </p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    {stats?.zodiacCounts && Object.keys(stats.zodiacCounts).length > 0
+                      ? Object.entries(stats.zodiacCounts)
+                        .sort((a, b) => b[1] - a[1])[0]?.[0] || ''
+                      : ''}
+                  </p>
+                </div>
+
+                <div className="bg-white rounded-2xl p-6 shadow-md">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-gray-600">查询天数</span>
+                    <span className="text-2xl">📅</span>
+                  </div>
+                  <p className="text-2xl font-bold text-blue-600">
+                    {stats?.queryDates?.length || 0} 天
+                  </p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    持续记录周期
+                  </p>
+                </div>
+
+                <div className="bg-white rounded-2xl p-6 shadow-md">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-gray-600">最近查询</span>
+                    <span className="text-2xl">🆕</span>
+                  </div>
+                  <p className="text-xl font-bold text-green-600">
+                    {stats?.lastQueryDate || '无'}
+                  </p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    最后一次查询
+                  </p>
+                </div>
+
+                <div className="bg-white rounded-2xl p-6 shadow-md">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-gray-600">统计周期</span>
+                    <span className="text-2xl">📈</span>
+                  </div>
+                  <p className="text-sm font-bold text-gray-800">
+                    {stats?.dateRange?.startDate || '-'}
+                    {' → '}
+                    {stats?.dateRange?.endDate || '-'}
+                  </p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    数据覆盖时间
+                  </p>
+                </div>
+              </div>
+
+              {/* 最近活动 */}
+              <div className="bg-white rounded-2xl p-6 shadow-md">
+                <h3 className="text-xl font-bold text-gray-800 mb-4">
+                  📅 最近活动统计（最近30天）
+                </h3>
+                <div className="space-y-3">
+                  {stats?.recentActivity && (
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <p className="text-sm text-blue-600 mb-1">最近7天</p>
+                        <p className="text-2xl font-bold text-blue-700">
+                          {stats.recentActivity.last7Days} 次
+                        </p>
+                        <p className="text-xs text-blue-500">日均 {Math.round(stats.recentActivity.last7Days / 7)} 次</p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <p className="text-sm text-green-600 mb-1">最近30天</p>
+                        <p className="text-2xl font-bold text-green-700">
+                          {stats.recentActivity.last30Days} 次
+                        </p>
+                        <p className="text-xs text-green-500">日均 {Math.round(stats.recentActivity.last30Days / 30)} 次</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* 星座分布 */}
+              <div className="bg-white rounded-2xl p-6 shadow-md">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-bold text-gray-800">
+                    ⭐ 星座查询分布
+                  </h3>
+                  <span className="text-sm text-gray-500">
+                    共 {Object.keys(zodiacStats || {}).length} 个星座
+                  </span>
+                </div>
+                <div className="space-y-3">
+                  {zodiacStats && Object.entries(zodiacStats)
+                    .sort((a, b) => (b[1] as any).percentage - (a[1] as any).percentage)
+                    .slice(0, 6)
+                    .map(([zodiac, data]: [string, any]) => (
+                      <div key={zodiac}>
+                        <div className="flex items-center justify-between mb-1">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xl">{getZodiacEmoji(zodiac)}</span>
+                            <span className="font-medium text-gray-700">
+                              {data.count} {zodiac}
+                            </span>
+                          </div>
+                          <span className="text-sm text-gray-500">
+                            {data.percentage}%
+                          </span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2.5">
+                          <div
+                            className="bg-gradient-to-r from-purple-600 to-pink-500 h-2.5 rounded-full transition-all duration-500"
+                            style={{ width: `${data.percentage}%` }}
+                          />
+                        </div>
+                        {data.lastQueried && (
+                          <p className="text-xs text-gray-400 mt-1">
+                            最后查询: {data.lastQueried}
+                          </p>
+                        )}
+                      </div>
+                    ))
+                  }
+                  {Object.keys(zodiacStats || {}).length > 6 && (
+                    <div className="text-center text-sm text-gray-500">
+                      还有 {Object.keys(zodiacStats || {}).length - 6} 个星座
+                    </div>
+                  )}
+              </div>
+
+              {/* 日期趋势 */}
+              <div className="bg-white rounded-2xl p-6 shadow-md">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-bold text-gray-800">
+                    📈 日期查询趋势
+                  </h3>
+                  <select
+                    className="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    onChange={(e) => setDateStats(historyManager.getDateStats(parseInt(e.target.value)))}
+                  >
+                    <option value={7}>最近7天</option>
+                    <option value={14}>最近14天</option>
+                    <option value={30} selected>最近30天</option>
+                    <option value={90}>最近90天</option>
+                  </select>
+                </div>
+                <div className="space-y-3">
+                  {dateStats.map((day, index) => (
+                    <div key={index} className="flex items-center gap-4">
+                      <div className="w-24 text-sm text-gray-600">
+                        {formatDate(day.date)}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-sm text-gray-700">
+                            {day.count} 次查询
+                          </span>
+                          <span className={`text-xs px-2 py-0.5 rounded-full ${
+                            day.trend === 'up' ? 'bg-red-100 text-red-600' :
+                            day.trend === 'down' ? 'bg-green-100 text-green-600' :
+                            'bg-gray-100 text-gray-600'
+                          }`}>
+                            {day.trend === 'up' ? '↑ 上升' :
+                             day.trend === 'down' ? '↓ 下降' :
+                             '→ 平稳'}
+                          </span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2.5">
+                          <div
+                            className={`h-2.5 rounded-full transition-all duration-500 ${
+                              day.count > 3 ? 'bg-gradient-to-r from-purple-600 to-pink-500' :
+                              day.count > 1 ? 'bg-gradient-to-r from-blue-500 to-cyan-500' :
+                              'bg-gray-400'
+                            }`}
+                            style={{ width: `${Math.min(day.count * 20, 100)}%` }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* 清空按钮 */}
+              <div className="flex justify-end">
+                <button
+                  onClick={clearAllHistory}
+                  className="px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-semibold"
+                >
+                  🗑️ 清空所有历史记录
+                </button>
+              </div>
+            </div>
+          </>
+          ) : (
+            <div className="bg-white rounded-2xl p-12 shadow-md text-center">
+              <div className="text-6xl mb-4">📭</div>
+              <h3 className="text-2xl font-bold text-gray-800 mb-2">
+                暂无数据
+              </h3>
+              <p className="text-gray-600 mb-6">
+                还没有查询记录，快去首页查看您的星座运势吧！
+              </p>
+              <a
+                href="/"
+                className="inline-block px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-semibold"
+              >
+                去查询运势
+              </a>
+            </div>
+          )}
+        </div>
+      </main>
+
+      {/* 页脚 */}
+      <footer className="mt-12 py-6 bg-gray-800 text-white">
+        <div className="container mx-auto px-4 text-center">
+          <p className="mb-2">星座运势网站 &copy; {new Date().getFullYear()}</p>
+          <p className="text-sm text-gray-400">数据仅供娱乐参考，本地存储，不会上传到服务器</p>
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+// 辅助函数：获取星座emoji
+function getZodiacEmoji(zodiac: string): string {
+  const emojis: Record<string, string> = {
+    aries: '♈',
+    taurus: '♉',
+    gemini: '♊',
+    cancer: '♋',
+    leo: '♌',
+    virgo: '♍',
+    libra: '♎',
+    scorpio: '♏',
+    sagittarius: '♐',
+    capricorn: '♑',
+    aquarius: '♒',
+    pisces: '♓',
+    ARIES: '♈',
+    TAURUS: '♉',
+    GEMINI: '♊',
+    CANCER: '♋',
+    LEO: '♌',
+    VIRGO: '♍',
+    LIBRA: '♎',
+    SCORPIO: '♏',
+    SAGITTARIUS: '♐',
+    CAPRICORN: '♑',
+    AQUARIUS: '♒',
+    PISCES: '♓'
+  };
+  return emojis[zodiac.toLowerCase()] || '☆';
+}
+
+// 辅助函数：格式化日期
+function formatDate(dateStr: string): string {
+  const date = new Date(dateStr);
+  return date.toLocaleDateString('zh-CN', {
+    month: 'short',
+    day: 'numeric'
+  });
+}

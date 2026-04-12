@@ -1,0 +1,94 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// 星座枚举
+enum ZodiacSign {
+  ARIES       // 白羊座
+  TAURUS      // 金牛座
+  GEMINI      // 双子座
+  CANCER      // 巨蟹座
+  LEO         // 狮子座
+  VIRGO       // 处女座
+  LIBRA       // 天秤座
+  SCORPIO     // 天蝎座
+  SAGITTARIUS // 射手座
+  CAPRICORN   // 摩羯座
+  AQUARIUS    // 水瓶座
+  PISCES      // 双鱼座
+}
+
+// 订单状态枚举
+enum OrderStatus {
+  PENDING    // 待支付
+  PROCESSING // 处理中
+  SUCCESS    // 成功
+  FAILED     // 失败
+  CANCELLED  // 取消
+}
+
+// 每日运势内容
+model FortuneContent {
+  id          String     @id @default(cuid())
+  date        DateTime   @unique // 日期（仅日期部分）
+  zodiac      ZodiacSign // 星座
+  content     Json       // 运势内容（JSON结构）
+  aiRefined   Boolean    @default(false) // 是否已AI润色
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([date, zodiac])
+}
+
+// 打赏订单
+model TipOrder {
+  id          String     @id @default(cuid())
+  orderId     String     @unique // 订单号
+  amount      Float      // 金额
+  currency    String     @default("CNY")
+  status      OrderStatus @default(PENDING)
+  isAnonymous Boolean    @default(true) // 是否匿名
+  metadata    Json?      // 附加信息
+  token       String?    @unique // 分享卡访问token
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([createdAt])
+  @@index([status])
+}
+
+// 分享卡片
+model ShareCard {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  orderId   String   @unique
+  imageUrl  String   // 图片存储地址
+  expiresAt DateTime // 过期时间
+  viewCount Int      @default(0) // 查看次数
+  createdAt DateTime @default(now())
+
+  @@index([token])
+  @@index([expiresAt])
+}
+
+// 运势模板（用于生成每日运势）
+model FortuneTemplate {
+  id        String     @id @default(cuid())
+  zodiac    ZodiacSign // 关联星座
+  category  String     // 分类：overall, love, career, health, wealth, saying
+  content   String     // 模板内容
+  weight    Int        @default(1) // 权重（用于随机选择）
+  isActive  Boolean    @default(true) // 是否启用
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@unique([zodiac, category])
+  @@index([zodiac, category, isActive])
+}

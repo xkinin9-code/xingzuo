@@ -1,0 +1,98 @@
+// 星座运势网站数据模型
+// 开发环境使用SQLite，生产环境使用PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// 每日运势内容
+model FortuneContent {
+  id          String   @id @default(cuid())
+  date        DateTime @unique // 日期（仅日期部分）
+  zodiac      ZodiacSign // 星座
+  content     Json     // 运势内容（JSON结构）
+  aiRefined   Boolean  @default(false) // 是否已AI润色
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([date, zodiac])
+  @@map("fortune_contents")
+}
+
+// 打赏订单
+model TipOrder {
+  id          String   @id @default(cuid())
+  orderId     String   @unique // 订单号
+  amount      Decimal  // 金额
+  currency    String   @default("CNY")
+  status      OrderStatus @default(PENDING)
+  isAnonymous Boolean  @default(true) // 是否匿名
+  metadata    Json?    // 附加信息
+  token       String?  @unique // 分享卡访问token
+  shareCard   ShareCard?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([createdAt])
+  @@index([status])
+  @@map("tip_orders")
+}
+
+// 分享卡片
+model ShareCard {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  orderId   String   @unique
+  order     TipOrder @relation(fields: [orderId], references: [orderId])
+  imageUrl  String   // 图片存储地址
+  expiresAt DateTime // 过期时间
+  viewCount Int      @default(0) // 查看次数
+  createdAt DateTime @default(now())
+
+  @@index([token])
+  @@index([expiresAt])
+  @@map("share_cards")
+}
+
+// 运势模板
+model FortuneTemplate {
+  id          String   @id @default(cuid())
+  name        String   // 模板名称
+  description String?  // 模板描述
+  content     Json     // 模板内容结构
+  isActive    Boolean  @default(true)
+  version     Int      @default(1)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("fortune_templates")
+}
+
+// 枚举类型
+enum ZodiacSign {
+  ARIES       // 白羊座
+  TAURUS      // 金牛座
+  GEMINI      // 双子座
+  CANCER      // 巨蟹座
+  LEO         // 狮子座
+  VIRGO       // 处女座
+  LIBRA       // 天秤座
+  SCORPIO     // 天蝎座
+  SAGITTARIUS // 射手座
+  CAPRICORN   // 摩羯座
+  AQUARIUS    // 水瓶座
+  PISCES      // 双鱼座
+}
+
+enum OrderStatus {
+  PENDING    // 待支付
+  PROCESSING // 处理中
+  SUCCESS    // 成功
+  FAILED     // 失败
+  CANCELLED  // 取消
+}
