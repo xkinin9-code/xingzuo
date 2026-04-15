@@ -4,7 +4,7 @@
  */
 
 import { getBirthdaySeed, getBirthdayTrait, getTimeGreeting } from './birthday';
-import { ZodiacInfo, getDayInZodiacCycle } from './zodiac';
+import { ZodiacInfo, getDayInZodiacCycle, ZODIAC_RANGES, ZodiacSign } from './zodiac';
 
 export interface PersonalizedContent {
   // 星座周期位置
@@ -24,6 +24,61 @@ export interface PersonalizedContent {
     colorIntensity: string; // 颜色强度描述
     matchedZodiacs: string[]; // 速配星座
     saying: string; // 今日箴言
+    luckyColorName: string; // 幸运颜色名称
+    luckyDirection: string; // 幸运方位
+    luckyAccessory: string; // 吉祥饰品
+    starRating: number; // 星级评分 1-5
+  };
+
+  // 当月星象
+  currentZodiacSeason: {
+    sign: ZodiacSign;
+    chineseName: string;
+    englishName: string;
+    symbol: string;
+  };
+}
+
+/**
+ * 获取当月星象（太阳星座）
+ */
+export function getCurrentZodiacSeason(date: Date = new Date()): PersonalizedContent['currentZodiacSeason'] {
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  const zodiac = ZODIAC_RANGES.find(z => {
+    if (z.sign === ZodiacSign.CAPRICORN) {
+      return (month === 12 && day >= 22) || (month === 1 && day <= 19);
+    }
+    // 检查是否在该星座范围内
+    const isStartMonth = month === z.startMonth;
+    const isEndMonth = month === z.endMonth;
+    return (
+      (isStartMonth && day >= z.startDay) ||
+      (isEndMonth && day < z.endDay) ||
+      (month > z.startMonth && month < z.endMonth)
+    );
+  }) || ZODIAC_RANGES[0];
+
+  const symbolMap: Record<string, string> = {
+    白羊座: "♈",
+    金牛座: "♉",
+    双子座: "♊",
+    巨蟹座: "♋",
+    狮子座: "♌",
+    处女座: "♍",
+    天秤座: "♎",
+    天蝎座: "♏",
+    射手座: "♐",
+    摩羯座: "♑",
+    水瓶座: "♒",
+    双鱼座: "♓",
+  };
+
+  return {
+    sign: zodiac.sign,
+    chineseName: zodiac.chineseName,
+    englishName: zodiac.englishName,
+    symbol: symbolMap[zodiac.chineseName] || "♈",
   };
 }
 
@@ -57,12 +112,16 @@ export function generatePersonalizedContent(
   // 生成随机元素
   const randomElements = generateRandomElements(zodiac, combinedSeed, currentDate);
 
+  // 当月星象
+  const currentZodiacSeason = getCurrentZodiacSeason(currentDate);
+
   return {
     dayInCycle,
     dayInCycleText,
     birthdayTrait,
     timeGreeting,
     randomElements,
+    currentZodiacSeason,
   };
 }
 
@@ -129,12 +188,39 @@ function generateRandomElements(
   const sayingIndex = Math.floor(pseudoRandom(5) * sayings.length);
   const saying = sayings[sayingIndex];
 
+  // 幸运颜色名称
+  const colorNames = [
+    '克莱因蓝', '勃艮第红', '薄荷绿', '琥珀金', '星空紫',
+    '珊瑚橙', '冰川银', '蔷薇粉', '翡翠绿', '琉璃黄',
+    '月白青', '朱砂红', '黛蓝', '秋香褐', '樱草紫'
+  ];
+  const luckyColorName = colorNames[Math.floor(pseudoRandom(6) * colorNames.length)];
+
+  // 幸运方位
+  const directions = ['东方', '南方', '西方', '北方', '东南方', '东北方', '西南方', '西北方'];
+  const luckyDirection = directions[Math.floor(pseudoRandom(7) * directions.length)];
+
+  // 吉祥饰品
+  const accessories = [
+    '月光石手链', '复古银质项链', '编织手绳', '水晶耳环',
+    '星座吊坠', '檀木手串', '珍珠胸针', '流星戒指',
+    '星云耳钉', '守护符挂件', '金丝眼镜链', '皮革手环'
+  ];
+  const luckyAccessory = accessories[Math.floor(pseudoRandom(8) * accessories.length)];
+
+  // 星级评分（3-5星）
+  const starRating = Math.floor(pseudoRandom(9) * 3) + 3;
+
   return {
     luckyNumber,
     luckyColor,
     colorIntensity,
     matchedZodiacs,
     saying,
+    luckyColorName,
+    luckyDirection,
+    luckyAccessory,
+    starRating,
   };
 }
 

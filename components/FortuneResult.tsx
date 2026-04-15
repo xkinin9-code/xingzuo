@@ -1,10 +1,17 @@
 "use client";
 
+import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { ZodiacInfo } from "@/lib/zodiac";
+import ZodiacIcon from "@/components/ZodiacIcon";
 
 interface FortuneResultProps {
-  zodiac: ZodiacInfo;
+  zodiac: {
+    sign: string;
+    chineseName: string;
+    englishName: string;
+    color: string;
+    element: string;
+  };
   fortune: {
     overall: string;
     love: string;
@@ -13,6 +20,7 @@ interface FortuneResultProps {
     wealth: string;
   };
   personalized: {
+    dayInCycle: number;
     dayInCycleText: string;
     birthdayTrait: string;
     timeGreeting: string;
@@ -22,234 +30,239 @@ interface FortuneResultProps {
       colorIntensity: string;
       matchedZodiacs: string[];
       saying: string;
+      luckyColorName: string;
+      luckyDirection: string;
+      luckyAccessory: string;
+      starRating: number;
     };
   };
+  extra: {
+    keyword: string;
+    meditation: string;
+    dailyMessage: string;
+  };
   className?: string;
+}
+
+function StarRating({ rating }: { rating: number }) {
+  return (
+    <div className="flex items-center gap-1"
+    >
+      {Array.from({ length: 5 }, (_, i) => (
+        <svg
+          key={i}
+          className={cn(
+            "w-5 h-5 sm:w-6 sm:h-6",
+            i < rating ? "text-[#D4AF37]" : "text-[#F5E6C8]/20"
+          )}
+          fill="currentColor"
+          viewBox="0 0 20 20"
+        >
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+        </svg>
+      ))}
+    </div>
+  );
 }
 
 export default function FortuneResult({
   zodiac,
   fortune,
   personalized,
+  extra,
   className,
 }: FortuneResultProps) {
-  const fortuneSections = [
-    {
-      id: "overall",
-      title: "整体运势",
-      icon: "🌟",
-      content: fortune.overall,
-      color: "bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30",
-      borderColor: "border-purple-200 dark:border-purple-800",
-    },
-    {
-      id: "love",
-      title: "爱情运势",
-      icon: "💖",
-      content: fortune.love,
-      color: "bg-gradient-to-br from-pink-100 to-rose-100 dark:from-pink-900/30 dark:to-rose-900/30",
-      borderColor: "border-pink-200 dark:border-pink-800",
-    },
-    {
-      id: "career",
-      title: "事业学业",
-      icon: "💼",
-      content: fortune.career,
-      color: "bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-blue-900/30 dark:to-cyan-900/30",
-      borderColor: "border-blue-200 dark:border-blue-800",
-    },
-    {
-      id: "health",
-      title: "健康状态",
-      icon: "🏥",
-      content: fortune.health,
-      color: "bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30",
-      borderColor: "border-green-200 dark:border-green-800",
-    },
-    {
-      id: "wealth",
-      title: "财运",
-      icon: "💰",
-      content: fortune.wealth,
-      color: "bg-gradient-to-br from-yellow-100 to-amber-100 dark:from-yellow-900/30 dark:to-amber-900/30",
-      borderColor: "border-yellow-200 dark:border-yellow-800",
-    },
-  ];
+  const { randomElements } = personalized;
 
-  const quickInfoItems = [
-    {
-      label: "幸运数字",
-      value: personalized.randomElements.luckyNumber.toString(),
-      icon: "🔢",
-    },
+  const infoItems = [
     {
       label: "幸运颜色",
-      value: personalized.randomElements.colorIntensity + zodiac.color,
-      icon: "🎨",
-      color: zodiac.color,
+      value: randomElements.luckyColorName,
+      icon: (
+        <span
+          className="w-4 h-4 rounded-full border border-[#F5E6C8]/30"
+          style={{ backgroundColor: randomElements.luckyColor }}
+        />
+      ),
+    },
+    {
+      label: "幸运数字",
+      value: randomElements.luckyNumber.toString(),
+      icon: (
+        <svg className="w-4 h-4 text-[#D4AF37]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
+        </svg>
+      ),
     },
     {
       label: "速配星座",
-      value: personalized.randomElements.matchedZodiacs.join("、"),
-      icon: "💞",
+      value: randomElements.matchedZodiacs.join(" "),
+      icon: (
+        <div className="flex -space-x-1">
+          {randomElements.matchedZodiacs.slice(0, 2).map((z, i) => (
+            <ZodiacIcon key={i} zodiacName={z} className="w-4 h-4" />
+          ))}
+        </div>
+      ),
+    },
+    {
+      label: "幸运方位",
+      value: randomElements.luckyDirection,
+      icon: (
+        <svg className="w-4 h-4 text-[#D4AF37]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      ),
+    },
+  ];
+
+  const cards = [
+    {
+      id: "love",
+      title: "爱情运势",
+      icon: "💝",
+      content: fortune.love,
+    },
+    {
+      id: "career",
+      title: "事业运势",
+      icon: "🏛️",
+      content: fortune.career,
+    },
+    {
+      id: "accessory",
+      title: "吉祥饰品",
+      icon: "💎",
+      content: randomElements.luckyAccessory,
+    },
+    {
+      id: "meditation",
+      title: "今日冥想语",
+      icon: "🌙",
+      content: extra.meditation,
     },
   ];
 
   return (
-    <div className={cn("space-y-6", className)}>
-      {/* Zodiac Header */}
-      <div className="fortune-card overflow-hidden p-6">
-        <div className="flex flex-col items-center text-center sm:flex-row sm:items-start sm:text-left">
-          {/* Zodiac Circle */}
-          <div className="relative mb-4 sm:mb-0 sm:mr-6">
-            <div
-              className="h-20 w-20 rounded-full"
-              style={{ backgroundColor: zodiac.color }}
-            />
-            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-3xl">
-              {getZodiacSymbol(zodiac.sign)}
-            </div>
-            <div className="absolute -right-2 -top-2 flex h-8 w-8 items-center justify-center rounded-full bg-white text-xs font-bold shadow-lg dark:bg-gray-800">
-              {zodiac.element}
-            </div>
-          </div>
-
-          {/* Zodiac Info */}
-          <div className="flex-1">
-            <div className="mb-2">
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
-                {zodiac.chineseName}
-              </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                {zodiac.englishName}
-              </p>
-            </div>
-
-            {/* Personal Info */}
-            <div className="space-y-2">
-              <p className="text-sm text-gray-700 dark:text-gray-300">
-                {personalized.timeGreeting}
-              </p>
-              <p className="text-sm text-gray-700 dark:text-gray-300">
-                {personalized.dayInCycleText}
-              </p>
-              <p className="text-sm text-gray-700 dark:text-gray-300">
-                {personalized.birthdayTrait}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Fortune Sections */}
-      <div className="space-y-4">
-        {fortuneSections.map((section) => (
-          <div
-            key={section.id}
-            className={cn(
-              "fortune-card overflow-hidden p-5 transition-all duration-300 hover:scale-[1.01]",
-              section.color,
-              section.borderColor,
-              "border"
-            )}
+    <div className={cn("space-y-6", className)}
+    >
+      {/* 主卡片 */}
+      <div className="relative overflow-hidden rounded-2xl border border-[#D4AF37]/20 bg-[#0f1221]/80 backdrop-blur-md p-6 sm:p-8"
+      >
+        {/* 顶部标题 */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6"
+        >
+          <div className="flex items-center gap-4"
           >
-            <div className="mb-3 flex items-center">
-              <span className="mr-3 text-2xl">{section.icon}</span>
-              <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
-                {section.title}
-              </h4>
+            <ZodiacIcon zodiacName={zodiac.chineseName} className="w-8 h-8 sm:w-10 sm:h-10" />
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-bold text-[#D4AF37] tracking-wider"
+              >
+                {extra.keyword}
+              </h2>
+              <p className="text-sm text-[#F5E6C8]/60 mt-1"
+              >
+                {zodiac.chineseName} · {zodiac.englishName}
+              </p>
             </div>
-            <div className="prose prose-sm max-w-none text-gray-700 dark:text-gray-300">
-              {section.content.split("\n").map((paragraph, idx) => (
-                <p key={idx} className="mb-2 last:mb-0">
-                  {paragraph}
-                </p>
+          </div>
+          <StarRating rating={randomElements.starRating} />
+        </div>
+
+        {/* 主体内容区 */}
+        <div className="flex flex-col lg:flex-row gap-6"
+        >
+          {/* 左侧星座图 */}
+          <div className="lg:w-64 flex-shrink-0"
+          >
+            <div className="relative aspect-[3/4] w-full max-w-[240px] mx-auto lg:mx-0 rounded-xl overflow-hidden border border-[#D4AF37]/20 shadow-2xl shadow-[#D4AF37]/5"
+            >
+              <Image
+                src={`/images/zodiac/${zodiac.chineseName}.png`}
+                alt={`${zodiac.chineseName}专属图`}
+                fill
+                className="object-cover"
+                sizes="(max-width: 1024px) 240px, 256px"
+              />
+            </div>
+            <p className="text-center lg:text-left text-xs text-[#F5E6C8]/40 mt-2"
+            >
+              {zodiac.chineseName}专属图
+            </p>
+          </div>
+
+          {/* 右侧信息区 */}
+          <div className="flex-1 space-y-6"
+          >
+            {/* 信息网格 */}
+            <div className="grid grid-cols-2 gap-4"
+            >
+              {infoItems.map((item) => (
+                <div
+                  key={item.label}
+                  className="rounded-xl border border-[#D4AF37]/10 bg-[#1a1d2e]/60 p-4 backdrop-blur-sm"
+                >
+                  <div className="flex items-center gap-2 mb-1"
+                  >
+                    {item.icon}
+                    <span className="text-xs text-[#F5E6C8]/50">{item.label}</span>
+                  </div>
+                  <div className="text-base sm:text-lg font-medium text-[#F5E6C8]"
+                  >
+                    {item.value}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* 运势卡片网格 */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+            >
+              {cards.map((card) => (
+                <div
+                  key={card.id}
+                  className="rounded-xl border border-[#D4AF37]/10 bg-[#1a1d2e]/60 p-4 sm:p-5 backdrop-blur-sm hover:border-[#D4AF37]/30 transition-colors"
+                >
+                  <div className="flex items-center gap-2 mb-3"
+                  >
+                    <span className="text-xl">{card.icon}</span>
+                    <h3 className="text-sm font-medium text-[#D4AF37]">{card.title}</h3>
+                  </div>
+                  <p className="text-sm text-[#F5E6C8]/80 leading-relaxed"
+                  >
+                    {card.content}
+                  </p>
+                </div>
               ))}
             </div>
           </div>
-        ))}
+        </div>
       </div>
 
-      {/* Quick Info Grid */}
-      <div className="grid gap-4 sm:grid-cols-3">
-        {quickInfoItems.map((item) => (
-          <div
-            key={item.label}
-            className="fortune-card flex flex-col items-center justify-center p-4 text-center"
+      {/* 每日寄语 */}
+      <div className="relative overflow-hidden rounded-2xl border border-[#D4AF37]/20 bg-gradient-to-br from-[#0f1221]/90 to-[#1a1d2e]/90 backdrop-blur-md p-6 sm:p-8"
+      >
+        <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-[#D4AF37]/5 rounded-full blur-2xl"
+        />
+        <div className="relative"
+        >
+          <div className="flex items-center justify-center gap-2 mb-4"
           >
-            <div className="mb-2 text-2xl">{item.icon}</div>
-            <div className="mb-1 text-sm font-medium text-gray-600 dark:text-gray-400">
-              {item.label}
-            </div>
-            <div
-              className={cn(
-                "text-lg font-bold",
-                item.color && "rounded-lg px-2 py-1"
-              )}
-              style={item.color ? { backgroundColor: item.color + "20" } : {}}
+            <span className="w-8 h-px bg-gradient-to-r from-transparent to-[#D4AF37]/50"
+            />
+            <h3 className="text-lg font-medium text-[#D4AF37] tracking-widest"
             >
-              {item.value}
-            </div>
+              每日寄语
+            </h3>
+            <span className="w-8 h-px bg-gradient-to-l from-transparent to-[#D4AF37]/50"
+            />
           </div>
-        ))}
-      </div>
-
-      {/* Today's Saying */}
-      <div className="fortune-card relative overflow-hidden p-6">
-        <div className="absolute -right-4 -top-4 text-6xl opacity-10">💫</div>
-        <div className="relative">
-          <div className="mb-3 flex items-center">
-            <span className="mr-2 text-xl">💫</span>
-            <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
-              今日箴言
-            </h4>
-          </div>
-          <blockquote className="text-center italic text-gray-700 dark:text-gray-300">
-            "{personalized.randomElements.saying}"
+          <blockquote className="text-center text-base sm:text-lg text-[#F5E6C8]/90 leading-relaxed max-w-3xl mx-auto"
+          >
+            "{extra.dailyMessage}"
           </blockquote>
-          <div className="mt-4 flex items-center justify-center text-sm text-gray-600 dark:text-gray-400">
-            <div className="mr-2 h-px w-8 bg-gray-300 dark:bg-gray-700" />
-            <span>星座运势每日占卜</span>
-            <div className="ml-2 h-px w-8 bg-gray-300 dark:bg-gray-700" />
-          </div>
-        </div>
-      </div>
-
-      {/* Footer Notes */}
-      <div className="rounded-lg bg-gray-50/50 p-4 text-center dark:bg-gray-800/50">
-        <div className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-          💡 温馨提示
-        </div>
-        <p className="text-xs text-gray-600 dark:text-gray-400">
-          运势内容每日更新，结果仅供参考。请理性看待，保持积极心态面对生活。
-        </p>
-        <div className="mt-3 flex justify-center space-x-1 text-xs text-gray-500 dark:text-gray-500">
-          <span>更新时间：每日 00:30</span>
-          <span>•</span>
-          <span>内容生成：模板规则 + AI润色</span>
-          <span>•</span>
-          <span>数据存储：本地浏览器</span>
         </div>
       </div>
     </div>
   );
-}
-
-// Helper function to get zodiac symbol
-function getZodiacSymbol(sign: string): string {
-  const symbolMap: Record<string, string> = {
-    白羊座: "♈",
-    金牛座: "♉",
-    双子座: "♊",
-    巨蟹座: "♋",
-    狮子座: "♌",
-    处女座: "♍",
-    天秤座: "♎",
-    天蝎座: "♏",
-    射手座: "♐",
-    摩羯座: "♑",
-    水瓶座: "♒",
-    双鱼座: "♓",
-  };
-  return symbolMap[sign] || "♈";
 }
