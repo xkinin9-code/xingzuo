@@ -19,6 +19,18 @@ export function formatChineseDate(date: Date): string {
 }
 
 /**
+ * 格式化日期时间为中文格式（精确到分钟）
+ */
+export function formatChineseDateTime(date: Date): string {
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  const hours = date.getHours().toString().padStart(2, "0");
+  const minutes = date.getMinutes().toString().padStart(2, "0");
+  return `${year}年${month}月${day}日 ${hours}:${minutes}`;
+}
+
+/**
  * 格式化时间为中文格式（如：上午 10:30）
  */
 export function formatChineseTime(date: Date): string {

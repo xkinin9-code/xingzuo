@@ -15,6 +15,13 @@ export interface HistoryRecord {
     luckyNumber?: number;
     luckyColor?: string;
   };
+  fullData?: {
+    // 完整运势数据，用于查看详情恢复
+    zodiac: any;
+    fortune: any;
+    personalized: any;
+    extra: any;
+  };
 }
 
 export interface HistoryStats {
@@ -55,7 +62,8 @@ export function addHistoryRecord(
   birthday: string,
   zodiac: string,
   zodiacEnglish: string,
-  fortuneContent?: HistoryRecord['fortuneContent']
+  fortuneContent?: HistoryRecord['fortuneContent'],
+  fullData?: HistoryRecord['fullData']
 ): HistoryRecord {
   const records = getAllHistory();
 
@@ -67,6 +75,7 @@ export function addHistoryRecord(
     zodiacEnglish,
     queryTime: Date.now(),
     fortuneContent,
+    fullData,
   };
 
   // 添加到开头

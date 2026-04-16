@@ -1,12 +1,22 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Noto_Sans_SC, Noto_Serif_SC } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
 
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin", "latin-ext"],
+});
+
+const notoSansSC = Noto_Sans_SC({
+  variable: "--font-noto-sans-sc",
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
+});
+
+const notoSerifSC = Noto_Serif_SC({
+  variable: "--font-noto-serif-sc",
+  subsets: ["latin"],
+  weight: ["400", "700", "900"],
 });
 
 export const metadata: Metadata = {
@@ -52,14 +62,12 @@ export default function RootLayout({
   return (
     <html lang="zh-CN" className="scroll-smooth">
       <body
-        className={`${inter.variable} font-sans min-h-screen antialiased`}
+        className={`${inter.variable} ${notoSansSC.variable} ${notoSerifSC.variable} font-sans min-h-screen antialiased`}
       >
         <div className="relative min-h-screen flex flex-col">
-          <Header />
           <main className="flex-1 w-full relative">
             {children}
           </main>
-          <Footer />
         </div>
       </body>
     </html>

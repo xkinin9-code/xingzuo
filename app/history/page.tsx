@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import Header from "@/components/Header";
 import LoadingSkeleton from "@/components/LoadingSkeleton";
-import ZodiacIcon from "@/components/ZodiacIcon";
 import {
   getAllHistory,
   getHistoryStats,
@@ -14,7 +14,11 @@ import {
   HistoryRecord,
   HistoryStats,
 } from "@/lib/local-history";
-import { cn, formatChineseDate } from "@/lib/utils";
+import { cn, formatChineseDate, formatChineseDateTime } from "@/lib/utils";
+
+function getZodiacIconPath(name: string) {
+  return `/images/icons/${name}.png`;
+}
 
 export default function HistoryPage() {
   const [history, setHistory] = useState<HistoryRecord[]>([]);
@@ -96,6 +100,7 @@ export default function HistoryPage() {
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden">
+      <Header containerClassName="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8" />
       <div className="fixed inset-0 z-0">
         <Image
           src="/images/backgrounds/result-bg.png"
@@ -212,8 +217,12 @@ export default function HistoryPage() {
                   <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                     {/* 星座信息 */}
                     <div className="flex items-center gap-3">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#1a1d2e] border border-[#D4AF37]/20">
-                        <ZodiacIcon zodiacName={record.zodiac} className="w-7 h-7" />
+                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#1a1d2e] border border-[#D4AF37]/20 overflow-hidden">
+                        <img
+                          src={getZodiacIconPath(record.zodiac)}
+                          alt={record.zodiac}
+                          className="h-10 w-10 object-contain"
+                        />
                       </div>
                       <div>
                         <div className="font-semibold text-[#F5E6C8] text-lg">
@@ -233,7 +242,7 @@ export default function HistoryPage() {
                         </span>
                         <span className="text-[#F5E6C8]/40">|</span>
                         <span className="text-[#F5E6C8]/80">
-                          查询时间：<span className="text-[#F5E6C8]">{formatChineseDate(new Date(record.queryTime))}</span>
+                          查询时间：<span className="text-[#F5E6C8]">{formatChineseDateTime(new Date(record.queryTime))}</span>
                         </span>
                       </div>
 
@@ -262,14 +271,23 @@ export default function HistoryPage() {
                     </div>
 
                     {/* 操作按钮 */}
-                    <div className="flex items-center gap-2 sm:flex-shrink-0">
+                    <div className="flex flex-col items-stretch gap-2 sm:flex-shrink-0">
                       <Link href={`/?birthday=${encodeURIComponent(record.birthday)}`}>
                         <Button
                           variant="outline"
                           size="sm"
-                          className="border-[#D4AF37]/30 text-[#F5E6C8] bg-transparent hover:bg-[#D4AF37]/10 hover:text-[#F5E6C8]"
+                          className="w-full border-[#D4AF37]/30 text-[#F5E6C8] bg-transparent hover:bg-[#D4AF37]/10 hover:text-[#F5E6C8]"
                         >
                           再次查询
+                        </Button>
+                      </Link>
+                      <Link href={`/?recordId=${encodeURIComponent(record.id)}`}>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full border-[#D4AF37]/30 text-[#F5E6C8] bg-transparent hover:bg-[#D4AF37]/10 hover:text-[#F5E6C8]"
+                        >
+                          查看详情
                         </Button>
                       </Link>
                       <Button

@@ -1,51 +1,88 @@
 "use client";
 
 import Link from "next/link";
-import ZodiacIcon from "@/components/ZodiacIcon";
-import { getCurrentZodiacSeason } from "@/lib/personalization";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
+import { getZodiacByDate } from "@/lib/zodiac";
 
-export default function Header() {
-  const currentSeason = getCurrentZodiacSeason();
+interface HeaderProps {
+  onHomeClick?: () => void;
+  containerClassName?: string;
+  rightNavLabel?: string;
+  rightNavHref?: string;
+}
+
+export default function Header({
+  onHomeClick,
+  containerClassName,
+  rightNavLabel,
+  rightNavHref,
+}: HeaderProps) {
+  const pathname = usePathname();
+  const isHistoryPage = pathname === "/history";
+
+  const today = new Date();
+  const currentZodiac = getZodiacByDate(today.getMonth() + 1, today.getDate());
+
+  const label = rightNavLabel || (isHistoryPage ? "查询记录" : "查询结果");
+  const href = rightNavHref || (isHistoryPage ? pathname : "/history");
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 w-full">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between">
-          {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2 group">
-            <span className="text-xl sm:text-2xl font-bold text-[#D4AF37] tracking-wider group-hover:text-[#F5E6C8] transition-colors">
-              寰宇神谕
-            </span>
-          </Link>
+      <div
+        className={cn(
+          "mx-auto flex h-16 items-center justify-between",
+          containerClassName || "max-w-7xl px-4 sm:px-6 lg:px-8"
+        )}
+      >
+        {/* 左侧 Logo */}
+        <div className="flex items-center">
+          <span className="text-lg lg:text-xl font-bold text-[#D4AF37] tracking-[0.15em]">
+            寰宇神谕
+          </span>
+        </div>
 
-          {/* Navigation */}
-          <nav className="flex items-center space-x-6 sm:space-x-10">
+        {/* 中间导航 */}
+        <nav className="flex items-center justify-center gap-8 lg:gap-16">
+          {onHomeClick ? (
+            <button
+              onClick={onHomeClick}
+              className="text-sm lg:text-base text-white/80 hover:text-white transition-colors tracking-wide"
+            >
+              首页
+            </button>
+          ) : (
             <Link
               href="/"
-              className="text-sm sm:text-base font-medium text-[#F5E6C8]/90 hover:text-[#D4AF37] transition-colors"
+              className="text-sm lg:text-base text-white/80 hover:text-white transition-colors tracking-wide"
             >
               首页
             </Link>
-            <Link
-              href="/history"
-              className="text-sm sm:text-base font-medium text-[#F5E6C8]/90 hover:text-[#D4AF37] transition-colors"
-            >
-              查询记录
-            </Link>
-          </nav>
+          )}
+          <Link
+            href={href}
+            className={cn(
+              "text-sm lg:text-base transition-colors tracking-wide",
+              isHistoryPage || pathname === href
+                ? "text-white/80"
+                : "text-white/80 hover:text-white"
+            )}
+          >
+            {label}
+          </Link>
+        </nav>
 
-          {/* Current Season */}
-          <div className="hidden sm:flex items-center space-x-2 text-[#F5E6C8]/90">
-            <span className="text-sm font-medium flex items-center gap-2">
-              当月星象：
-              <img
-                src={`/images/icons/${currentSeason.chineseName}.png`}
-                alt={currentSeason.chineseName}
-                className="h-7 w-7 object-cover"
-              />
-              {currentSeason.chineseName}季
-            </span>
-          </div>
+        {/* 右侧当月星象 */}
+        <div className="flex items-center gap-2">
+          <span className="text-sm lg:text-base text-white/80 tracking-wide whitespace-nowrap">
+            当月星象：
+            <img
+              src={`/images/icons/${currentZodiac.chineseName}.png`}
+              alt={currentZodiac.chineseName}
+              className="inline-block w-5 h-5 lg:w-6 lg:h-6 object-contain align-text-bottom mx-1"
+            />
+            {currentZodiac.chineseName}季
+          </span>
         </div>
       </div>
     </header>

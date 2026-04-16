@@ -3,7 +3,7 @@
  * 根据生日生成个性化内容
  */
 
-import { getBirthdaySeed, getBirthdayTrait, getTimeGreeting } from './birthday';
+import { getBirthdayTrait, getTimeGreeting } from './birthday';
 import { ZodiacInfo, getDayInZodiacCycle, ZODIAC_RANGES, ZodiacSign } from './zodiac';
 
 export interface PersonalizedContent {
@@ -93,18 +93,18 @@ export function generatePersonalizedContent(
   zodiac: ZodiacInfo,
   currentDate: Date = new Date()
 ): PersonalizedContent {
-  const birthdaySeed = getBirthdaySeed(birthday);
-  const dateSeed = currentDate.getDate() + currentDate.getMonth() * 31;
-  const combinedSeed = birthdaySeed + dateSeed;
+  // 使用日期和星座生成每日种子，确保同一天同一星座的结果完全一致
+  const dateSeed = currentDate.getDate() + currentDate.getMonth() * 31 + currentDate.getFullYear() * 366;
+  const zodiacSeed = zodiac.chineseName.charCodeAt(0) + (zodiac.chineseName.charCodeAt(1) || 0);
+  const combinedSeed = dateSeed + zodiacSeed;
 
   // 计算星座周期天数
   const dayInCycle = getDayInZodiacCycle(zodiac, currentDate);
   const dayInCycleText = `今天是你在${zodiac.chineseName}的第${dayInCycle}天`;
 
-  // 获取生日特质
-  const [, , dayStr] = birthday.split('-');
-  const day = parseInt(dayStr, 10);
-  const birthdayTrait = getBirthdayTrait(day);
+  // 每日特质（基于日期和星座，确保同一天同一星座一致）
+  const traitDay = (dateSeed + zodiacSeed) % 31 + 1;
+  const birthdayTrait = getBirthdayTrait(traitDay);
 
   // 获取时间问候
   const timeGreeting = getTimeGreeting(currentDate);
@@ -151,7 +151,6 @@ function generateRandomElements(
   ];
   const colorIndex = Math.floor(pseudoRandom(2) * colorVariations.length);
   const colorIntensity = colorVariations[colorIndex].intensity;
-  const luckyColor = zodiac.color; // 实际应用中可能需要颜色转换
 
   // 速配星座（1-2个，排除自己）
   const allZodiacs = [
@@ -195,6 +194,26 @@ function generateRandomElements(
     '月白青', '朱砂红', '黛蓝', '秋香褐', '樱草紫'
   ];
   const luckyColorName = colorNames[Math.floor(pseudoRandom(6) * colorNames.length)];
+
+  // 颜色名称对应的颜色值映射
+  const colorValueMap: Record<string, string> = {
+    '克莱因蓝': '#002FA7',
+    '勃艮第红': '#900021',
+    '薄荷绿': '#98FF98',
+    '琥珀金': '#FFBF00',
+    '星空紫': '#8B5CF6',
+    '珊瑚橙': '#FF7F50',
+    '冰川银': '#C0C0C0',
+    '蔷薇粉': '#FFC0CB',
+    '翡翠绿': '#50C878',
+    '琉璃黄': '#FDE047',
+    '月白青': '#B0E0E6',
+    '朱砂红': '#E34234',
+    '黛蓝': '#29465B',
+    '秋香褐': '#D2691E',
+    '樱草紫': '#EE82EE',
+  };
+  const luckyColor = colorValueMap[luckyColorName] || zodiac.color;
 
   // 幸运方位
   const directions = ['东方', '南方', '西方', '北方', '东南方', '东北方', '西南方', '西北方'];
