@@ -136,7 +136,7 @@ export default function FortuneResult({
         </div>
       ),
       content: extra.meditation
-        ? extra.meditation.replace(/'([^']+)'/g, '“$1”').replace(/"([^"]+)"/g, '“$1”')
+        ? extra.meditation.replace(/'([^']+)'/g, '“$1"').replace(/"([^"]+)"/g, '“$1"')
         : extra.meditation,
     },
   ];
@@ -159,7 +159,7 @@ export default function FortuneResult({
         {/* 第一行：星座专属图 + 右侧基础信息，并列排布 */}
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 items-center lg:items-stretch justify-center max-w-6xl mx-auto">
           {/* 左侧星座图 */}
-          <div className="w-64 sm:w-72 lg:w-80 xl:w-[360px] flex-shrink-0 flex flex-col items-center self-center lg:self-start">
+          <div className="w-64 sm:w-72 lg:w-80 xl:w-[360px] flex-shrink-0 flex flex-col items-center self-center lg:self-start animate-fade-in-up">
             <div className="relative w-full aspect-[1792/2400] rounded-2xl overflow-hidden border border-white/10 shadow-2xl shadow-black/40">
               <Image
                 src={`/images/zodiac/${zodiac.chineseName}.png`}
@@ -169,8 +169,8 @@ export default function FortuneResult({
                 sizes="(max-width: 1280px) 288px, 360px"
               />
             </div>
-            <p className="mt-4 text-center text-lg lg:text-xl text-white/70 tracking-wide">
-              水瓶座
+            <p className="mt-4 text-center text-lg lg:text-xl text-white/70 tracking-wide animate-fade-in-up animate-delay-100">
+              {zodiac.chineseName}
             </p>
           </div>
 
@@ -178,19 +178,21 @@ export default function FortuneResult({
           <div className="flex-1 flex flex-col items-center lg:items-start justify-center gap-4 lg:gap-5 max-w-2xl">
             {/* 主题词 + 星级 */}
             <div className="flex items-center justify-center lg:justify-start gap-4 lg:gap-6">
-              <h2 className="text-5xl sm:text-6xl lg:text-7xl font-black text-[#e6c866] tracking-[0.15em] drop-shadow-[0_0_25px_rgba(233,195,73,0.4)] font-[family-name:var(--font-noto-serif-sc)]">
+              <h2 className="text-5xl sm:text-6xl lg:text-7xl font-black text-[#e6c866] tracking-[0.15em] drop-shadow-[0_0_25px_rgba(233,195,73,0.4)] font-[family-name:var(--font-noto-serif-sc)] animate-fade-in-up">
                 {extra.keyword}
               </h2>
-              <StarRating rating={randomElements.starRating} />
+              <div className="animate-fade-in-up animate-delay-100">
+                <StarRating rating={randomElements.starRating} />
+              </div>
             </div>
 
             {/* 今日总运势 */}
-            <p className="text-base lg:text-lg text-white/85 leading-[1.8] tracking-wide max-w-lg text-center lg:text-left">
+            <p className="text-base lg:text-lg text-white/85 leading-[1.8] tracking-wide max-w-lg text-center lg:text-left animate-fade-in-up animate-delay-200">
               {fortune.overall}
             </p>
 
             {/* 基础信息区 */}
-            <div className="grid grid-cols-2 gap-x-[60px] gap-y-10 lg:gap-x-[100px] lg:gap-y-14 w-full max-w-lg pl-[35px]">
+            <div className="grid grid-cols-2 gap-x-[60px] gap-y-10 lg:gap-x-[100px] lg:gap-y-14 w-full max-w-lg pl-[35px] animate-fade-in-up animate-delay-300">
               {/* 幸运颜色 */}
               <div className="flex flex-col gap-2 lg:gap-3">
                 <div className="text-lg lg:text-xl text-[#e6c866]/90 tracking-[0.1em]">幸运颜色</div>
@@ -246,10 +248,16 @@ export default function FortuneResult({
 
         {/* 第二行：四个磨砂玻璃卡片，宽度与上行一致 */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-5 max-w-6xl mx-auto">
-          {cards.map((card) => (
+          {cards.map((card, index) => (
             <div
               key={card.id}
-              className="relative rounded-[20px] backdrop-blur-[7.5px] bg-[rgba(0,0,0,0.2)] border border-white/5 p-6 lg:p-8"
+              className={cn(
+                "relative rounded-[20px] backdrop-blur-[7.5px] bg-[rgba(0,0,0,0.2)] border border-white/5 p-6 lg:p-8 animate-fade-in-up card-hover-lift",
+                index === 0 && "animate-delay-400",
+                index === 1 && "animate-delay-500",
+                index === 2 && "animate-delay-600",
+                index === 3 && "animate-delay-700"
+              )}
             >
               <div className="flex items-center justify-center gap-3 mb-3 lg:mb-4">
                 <div className="w-11 h-11 lg:w-14 lg:h-14 flex items-center justify-center shrink-0">
@@ -269,12 +277,12 @@ export default function FortuneResult({
         </div>
 
         {/* 第三行：每日寄语，宽度稍小，居中 */}
-        <div className="max-w-5xl mx-auto">
-          <h3 className="text-center text-3xl sm:text-4xl lg:text-5xl font-black text-[#e6c866] tracking-[0.25em] lg:tracking-[0.3em] mb-6 lg:mb-8 drop-shadow-[0_0_25px_rgba(233,195,73,0.4)] font-[family-name:var(--font-noto-serif-sc)]">
+        <div className="max-w-5xl mx-auto animate-fade-in-up animate-delay-700">
+          <h3 className="text-center text-3xl sm:text-4xl lg:text-5xl font-black tracking-[0.25em] lg:tracking-[0.3em] mb-6 lg:mb-8 drop-shadow-[0_0_25px_rgba(233,195,73,0.4)] font-[family-name:var(--font-noto-serif-sc)] animate-shimmer-text">
             每日寄语
           </h3>
-          <blockquote className="text-center text-lg sm:text-xl lg:text-2xl text-[#fff8f8] leading-[1.6] lg:leading-[1.7] px-4 italic mt-2 lg:mt-3 font-[family-name:var(--font-noto-serif-sc)]">
-            “{extra.dailyMessage}”
+          <blockquote className="text-center text-lg sm:text-xl lg:text-2xl text-[#fff8f8] leading-[1.6] lg:leading-[1.7] px-4 italic mt-2 lg:mt-3 font-[family-name:var(--font-noto-serif-sc)] animate-fade-in-up animate-delay-800">
+            &ldquo;{extra.dailyMessage}&rdquo;
           </blockquote>
         </div>
       </div>

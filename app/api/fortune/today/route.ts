@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getZodiacByBirthday } from "@/lib/zodiac";
 import { validateBirthday } from "@/lib/birthday";
 import { generatePersonalizedContent } from "@/lib/personalization";
+import { getTodayFortuneFromCacheOrAI } from "@/lib/deepseek";
 
 interface FortuneTemplate {
   keyword: string;
@@ -163,8 +164,14 @@ export async function GET(request: NextRequest) {
     // 判断星座
     const zodiac = getZodiacByBirthday(birthday);
 
-    // 获取运势数据
-    const template = zodiacTemplates[zodiac.chineseName];
+    // 获取运势数据：优先 DeepSeek AI 生成，失败则回退硬编码模板
+    let template = await getTodayFortuneFromCacheOrAI(zodiac.chineseName);
+    let source = "deepseek";
+
+    if (!template) {
+      template = zodiacTemplates[zodiac.chineseName];
+      source = "template";
+    }
 
     if (!template) {
       return NextResponse.json(
@@ -212,7 +219,7 @@ export async function GET(request: NextRequest) {
         },
         metadata: {
           generatedAt: new Date().toISOString(),
-          source: "template",
+          source,
           wordCount: Object.values(fortuneData).join(" ").length,
         },
       },

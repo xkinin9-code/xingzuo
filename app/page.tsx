@@ -120,14 +120,16 @@ export default function Home() {
       {/* 首页背景 */}
       {!hasResult && !isLoading && (
         <div className="fixed inset-0 z-0">
-          <Image
-            src="/images/backgrounds/home-bg.png"
-            alt="星空背景"
-            fill
-            priority
-            className="object-cover object-center"
-            sizes="100vw"
-          />
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            poster="/images/backgrounds/home-bg.png"
+            className="absolute inset-0 w-full h-full object-cover object-center"
+          >
+            <source src="/videos/home-bg.mp4" type="video/mp4" />
+          </video>
           <div className="absolute inset-0 bg-black/20" />
         </div>
       )}
@@ -135,13 +137,19 @@ export default function Home() {
       {/* 加载背景 */}
       {isLoading && (
         <div className="fixed inset-0 z-30">
-          <Image
-            src="/images/backgrounds/loading-bg.jpg"
-            alt="加载背景"
-            fill
-            className="object-cover object-center"
-            sizes="100vw"
-          />
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            webkit-playsinline="true"
+            x5-playsinline="true"
+            x5-video-player-type="h5-page"
+            poster="/images/backgrounds/loading-bg.jpg"
+            className="absolute inset-0 w-full h-full object-cover object-center"
+          >
+            <source src="/videos/loading-bg.mp4" type="video/mp4" />
+          </video>
           <div className="absolute inset-0 bg-black/30" />
         </div>
       )}
@@ -158,6 +166,10 @@ export default function Home() {
             priority
           />
           <div className="absolute inset-0 bg-gradient-to-b from-[#2a1f4e]/60 via-[#1a153a]/50 to-[#0f0c28]/60" />
+          <div className="result-starry-bg pointer-events-none">
+            <div className="star-field" />
+            <div className="star-glow" />
+          </div>
         </div>
       )}
 
@@ -220,19 +232,12 @@ export default function Home() {
       {isLoading && (
         <div className="relative z-40 flex min-h-screen flex-col items-center justify-center px-4"
         >
-          <div className="text-center space-y-6"
+          <div className="text-center"
           >
-            <div className="animate-pulse"
+            <h2 className="text-2xl sm:text-3xl font-medium text-[#D4AF37] tracking-[0.3em] drop-shadow-lg animate-pulse"
             >
-              <h2 className="text-2xl sm:text-3xl font-medium text-[#D4AF37] tracking-[0.3em] drop-shadow-lg"
-              >
-                静候星辰的回响...
-              </h2>
-              <p className="mt-4 text-[#F5E6C8]/70 text-lg tracking-widest animate-pulse"
-              >
-                &nbsp;
-              </p>
-            </div>
+              静候星辰的回响...
+            </h2>
           </div>
         </div>
       )}
