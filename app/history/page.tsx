@@ -73,7 +73,7 @@ export default function HistoryPage() {
       <div className="relative min-h-screen w-full overflow-hidden">
         <div className="fixed inset-0 z-0">
           <Image
-            src="/images/backgrounds/result-bg.png"
+            src="/images/backgrounds/result-bg.webp"
             alt="背景"
             fill
             className="object-cover object-center"
@@ -103,7 +103,7 @@ export default function HistoryPage() {
       <Header containerClassName="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8" />
       <div className="fixed inset-0 z-0">
         <Image
-          src="/images/backgrounds/result-bg.png"
+          src="/images/backgrounds/result-bg.webp"
           alt="背景"
           fill
           className="object-cover object-center"

@@ -146,7 +146,7 @@ export default function FortuneResult({
       {/* 背景图 - 覆盖整个结果区域 */}
       <div className="absolute inset-0 z-0">
         <Image
-          src="/images/backgrounds/result-text-bg.png"
+          src="/images/backgrounds/result-text-bg.webp"
           alt="结果背景"
           fill
           className="object-cover object-center"
@@ -162,7 +162,7 @@ export default function FortuneResult({
           <div className="w-64 sm:w-72 lg:w-80 xl:w-[360px] flex-shrink-0 flex flex-col items-center self-center lg:self-start animate-fade-in-up">
             <div className="relative w-full aspect-[1792/2400] rounded-2xl overflow-hidden border border-white/10 shadow-2xl shadow-black/40">
               <Image
-                src={`/images/zodiac/${zodiac.chineseName}.png`}
+                src={`/images/zodiac/${zodiac.chineseName}.webp`}
                 alt={`${zodiac.chineseName}专属图`}
                 fill
                 className="object-cover"
