@@ -2,8 +2,8 @@ name: Daily Fortune Generation
 
 on:
   schedule:
-    # UTC 22:00 = 北京时间 06:00（每天早上6点自动更新）
-    - cron: '0 22 * * *'
+    # UTC 16:00 = 北京时间 00:00（每天凌晨12点自动更新）
+    - cron: '0 16 * * *'
   workflow_dispatch:
     # 支持在 GitHub Actions 页面手动触发
 
