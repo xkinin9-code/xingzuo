@@ -21,7 +21,7 @@ const notoSerifSC = Noto_Serif_SC({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://xingzuo.vercel.app"),
+  metadataBase: new URL("https://xingzuo-opal.vercel.app"),
   title: "寰宇神谕 | 输入生日查看今日运势",
   description: "免费星座运势查询，输入生日即可获取个性化的今日星座运势解读。涵盖爱情、事业、健康、财运等方面，无需注册，完全免费。",
   keywords: ["星座运势", "今日运势", "星座查询", "生日运势", "星座占卜", "星座运势每日更新"],
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "zh_CN",
-    url: "https://xingzuo.vercel.app",
+    url: "https://xingzuo-opal.vercel.app",
     title: "寰宇神谕",
     description: "输入生日，获取你的今日星座运势",
     siteName: "寰宇神谕",
