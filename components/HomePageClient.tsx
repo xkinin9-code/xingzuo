@@ -7,6 +7,9 @@ import BirthdayForm from "@/components/BirthdayForm";
 import FortuneResult from "@/components/FortuneResult";
 import Header from "@/components/Header";
 import { addHistoryRecord, getAllHistory } from "@/lib/local-history";
+import { getZodiacByBirthday } from "@/lib/zodiac";
+import { validateBirthday } from "@/lib/birthday";
+import { generatePersonalizedContent } from "@/lib/personalization";
 import { cn } from "@/lib/utils";
 
 function PageContent() {
@@ -42,13 +45,98 @@ function PageContent() {
     }
   }, [searchParams]);
 
+  // 组装返回数据（复用 API 中的逻辑）
+  const assembleResult = (birthday: string, fortuneTemplate: any) => {
+    const zodiac = getZodiacByBirthday(birthday);
+    const personalizedLocal = generatePersonalizedContent(birthday, zodiac);
+
+    const fortuneDataLocal = {
+      overall: fortuneTemplate.overall,
+      love: fortuneTemplate.love,
+      career: fortuneTemplate.career,
+      health: fortuneTemplate.health,
+      wealth: fortuneTemplate.wealth,
+    };
+
+    return {
+      zodiac: {
+        sign: zodiac.sign,
+        chineseName: zodiac.chineseName,
+        englishName: zodiac.englishName,
+        color: zodiac.color,
+        element: zodiac.element,
+      },
+      fortune: fortuneDataLocal,
+      personalized: {
+        dayInCycle: personalizedLocal.dayInCycle,
+        dayInCycleText: personalizedLocal.dayInCycleText,
+        birthdayTrait: personalizedLocal.birthdayTrait,
+        timeGreeting: personalizedLocal.timeGreeting,
+        randomElements: personalizedLocal.randomElements,
+        currentZodiacSeason: personalizedLocal.currentZodiacSeason,
+      },
+      extra: {
+        keyword: fortuneTemplate.keyword,
+        meditation: fortuneTemplate.meditation,
+        dailyMessage: fortuneTemplate.dailyMessage,
+      },
+    };
+  };
+
   const handleBirthdaySubmit = async (birthday: string) => {
     setIsLoading(true);
     setError(null);
     setHasResult(false);
 
     try {
-      const response = await fetch(`/api/fortune/today?birthday=${encodeURIComponent(birthday)}`);
+      // 1. 先尝试 API（Vercel 等支持 API 的环境）
+      let response = await fetch(
+        `/api/fortune/today?birthday=${encodeURIComponent(birthday)}`
+      );
+
+      // 2. API 不存在时 fallback 到静态 JSON（Cloudflare Pages 纯静态导出）
+      if (!response.ok && (response.status === 404 || response.status === 0)) {
+        console.log("API 不可用，fallback 到静态 JSON...");
+        const staticRes = await fetch("/api/fortune/today.json");
+        if (!staticRes.ok) {
+          throw new Error("未找到今日运势数据");
+        }
+        const staticData = await staticRes.json();
+        const zodiac = getZodiacByBirthday(birthday);
+        const template = staticData.fortunes?.[zodiac.chineseName];
+        if (!template) {
+          throw new Error("未找到该星座的运势数据");
+        }
+        const result = assembleResult(birthday, template);
+        setZodiacInfo(result.zodiac);
+        setFortuneData(result.fortune);
+        setPersonalized(result.personalized);
+        setExtra(result.extra);
+
+        addHistoryRecord(
+          birthday,
+          result.zodiac.chineseName,
+          result.zodiac.englishName,
+          {
+            overall: result.fortune.overall.substring(0, 100) + "...",
+            luckyNumber: result.personalized.randomElements.luckyNumber,
+            luckyColor: result.personalized.randomElements.luckyColor,
+          },
+          {
+            zodiac: result.zodiac,
+            fortune: result.fortune,
+            personalized: result.personalized,
+            extra: result.extra,
+          }
+        );
+
+        setTimeout(() => {
+          setIsLoading(false);
+          setHasResult(true);
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }, 2000);
+        return;
+      }
 
       if (!response.ok) {
         const errorData = await response.json();

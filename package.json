@@ -12,7 +12,9 @@
     "prisma:studio": "prisma studio",
     "prisma:push": "prisma db push",
     "generate:daily": "tsx scripts/generate-cache.ts",
-    "seed:templates": "tsx scripts/seed-template.ts"
+    "seed:templates": "tsx scripts/seed-template.ts",
+    "prepare:static-api": "tsx scripts/prepare-static-api.ts",
+    "build:cf": "node scripts/build-cf.js"
   },
   "dependencies": {
     "@prisma/client": "^6.2.1",
@@ -36,6 +38,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "cross-env": "^10.1.0",
     "prisma": "^6.2.1",
     "tailwindcss": "^4",
     "tsx": "^4.19.3",
