@@ -97,7 +97,8 @@ function PageContent() {
       // 2. API 不存在时 fallback 到静态 JSON（Cloudflare Pages 纯静态导出）
       if (!response.ok && (response.status === 404 || response.status === 0)) {
         console.log("API 不可用，fallback 到静态 JSON...");
-        const staticRes = await fetch("/api/fortune/today.json");
+        const todayStr = new Date().toISOString().slice(0, 10);
+        const staticRes = await fetch(`/api/fortune/today.json?t=${todayStr}`, { cache: 'no-store' });
         if (!staticRes.ok) {
           throw new Error("未找到今日运势数据");
         }
