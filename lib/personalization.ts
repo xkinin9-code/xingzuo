@@ -227,8 +227,14 @@ function generateRandomElements(
   ];
   const luckyAccessory = accessories[Math.floor(pseudoRandom(8) * accessories.length)];
 
-  // 星级评分（3-5星）
-  const starRating = Math.floor(pseudoRandom(9) * 3) + 3;
+  // 星级评分（1-5星）—— 加入额外波动因子，确保不同日期有明显差异
+  const dayOfYear = date.getMonth() * 31 + date.getDate();
+  const zodiacIndex = allZodiacs.indexOf(zodiac.chineseName);
+  // 使用两个独立随机源混合，避免连续多天都是同一星级
+  const ratingSeedA = Math.floor(pseudoRandom(9) * 5) + 1; // 1-5
+  const ratingSeedB = Math.floor(pseudoRandom(10 + dayOfYear + zodiacIndex) * 5) + 1; // 1-5
+  // 取平均值后四舍五入，确保结果在 1-5 之间且每天不同
+  const starRating = Math.min(5, Math.max(1, Math.round((ratingSeedA + ratingSeedB) / 2)));
 
   return {
     luckyNumber,
