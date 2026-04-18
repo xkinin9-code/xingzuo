@@ -55,27 +55,38 @@ function buildSinglePrompt(zodiacName: string): string {
 }
 
 function buildBatchPrompt(): string {
-  return `你是一位专业的占星师。请为以下12个星座一次性生成今日运势：
+  // 用今日日期做创作锚点，确保每天生成独特视角
+  const d = new Date();
+  d.setTime(d.getTime() + 8 * 60 * 60 * 1000);
+  const todayStr = d.toISOString().slice(0, 10);
+
+  return `你是一位每日更新运势的创意占星师。今天是 ${todayStr}。
+
+**创作要求**：
+1. 12个星座要一次性生成
+2. 每个星座的keyword必须是2个字的全新主题词，不能和以往重复
+3. 运势内容必须从**全新视角**切入，不要套用常规模板
+4. 允许使用不同风格的语言：有的温暖诗意，有的犀利洞见，有的东方禅意，有的现代简洁
+5. 必须让不同星座的今日运势有**本质区别**，不能只是换个关键词的重复套路
+6. 冥想引导语格式"我是...，我如..."要保持，但意象要每天不同
 
 ${ZODIAC_LIST.join("、")}
 
-每个星座包含以下字段，请严格控制字数：
-- keyword: 2个字的今日主题词
-- overall: 今日整体运势概述（60-90字）
-- love: 爱情运势（60-90字）
-- career: 事业/学业运势（60-90字）
-- health: 健康运势（60-90字）
-- wealth: 财富运势（60-90字）
-- meditation: 用"我是...，我如..."格式的今日冥想引导语（30-50字）
-- dailyMessage: 一句温暖有力的每日寄语（30-50字）
+每个星座字段和字数：
+- keyword: 2字（必须是没见过的新词，不允许用"破晓、觉醒、沉淀、联结、闪耀、精进、攀登、革新、梦境、和谐、滋养"等已用词汇）
+- overall: 60-90字
+- love: 60-90字
+- career: 60-90字
+- health: 60-90字
+- wealth: 60-90字
+- meditation: 30-50字（每天意象完全不同）
+- dailyMessage: 30-50字（必须原创且有力）
 
-风格要求：诗意、温暖、有哲理，带一点神秘感。
-
-请严格按照以下 JSON 格式返回（不要加 markdown 代码块标记）：
+请严格按照JSON格式返回（不要加markdown代码块）：
 {
   "白羊座": { "keyword": "...", "overall": "...", "love": "...", "career": "...", "health": "...", "wealth": "...", "meditation": "...", "dailyMessage": "..." },
   "金牛座": { ... },
-  ...以此类推
+  ...
 }`;
 }
 
@@ -172,7 +183,7 @@ export async function generateAllZodiacsBatch(): Promise<Record<string, FortuneT
           { role: "system", content: "你是一位专业的占星师，擅长用诗意温暖的语言解读星座运势。请确保返回完整、格式正确的 JSON。" },
           { role: "user", content: buildBatchPrompt() },
         ],
-        temperature: 0.8,
+        temperature: 0.95,
         max_tokens: 8192,
       }),
     });
