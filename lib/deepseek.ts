@@ -27,7 +27,10 @@ function getCachePath(date: string): string {
 }
 
 function getTodayDate(): string {
-  return new Date().toISOString().slice(0, 10);
+  // 使用北京时间 (UTC+8) — GitHub Actions 运行在 UTC 环境
+  const d = new Date();
+  d.setTime(d.getTime() + 8 * 60 * 60 * 1000);
+  return d.toISOString().slice(0, 10);
 }
 
 function buildSinglePrompt(zodiacName: string): string {
