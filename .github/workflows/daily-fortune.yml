@@ -1,4 +1,4 @@
-name: Daily Fortune Generation
+name: Daily Fortune Generation & Deploy
 
 on:
   schedule:
@@ -7,8 +7,12 @@ on:
   workflow_dispatch:
     # 支持在 GitHub Actions 页面手动触发
 
+permissions:
+  contents: write
+  deployments: write
+
 jobs:
-  generate:
+  generate-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -51,7 +55,7 @@ jobs:
       - name: Regenerate static API file
         run: npx tsx scripts/prepare-static-api.ts
 
-      - name: Commit and push if changed
+      - name: Commit and push cache
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -60,3 +64,15 @@ jobs:
             git commit -m "auto: daily fortune $(date -u -d '+8 hours' +%Y-%m-%d)" &&
             git push
           )
+
+      - name: Build for Cloudflare Pages
+        run: npm run build:cf
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: ${{ secrets.CLOUDFLARE_PROJECT_NAME }}
+          directory: dist
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
